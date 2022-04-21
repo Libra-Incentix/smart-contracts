@@ -18,38 +18,35 @@ describe("Airdrop contract", function () {
   // A common pattern is to declare some variables, and assign them in the
   // `before` and `beforeEach` callbacks.
 
-  let airdrop;
-  let airdropOwner;
-  let airdropDeployed;
-  let tokenAddr;
-  let addr1;
-  let addr2;
-  let addrs;
-  let tokenAddress;
-  let beneficairy;
 
-
-  
   // `beforeEach` will run before each test, re-deploying the contract every
   // time. It receives a callback, which can be async.
   beforeEach(async function () {
     // Get the ContractFactory and Signers here.
-    [airdropOwner, tokenAddr, addr1, addr2, ...addrs] = await ethers.getSigners()
-    const Airdrp = await ethers.getContractFactory("Airdrop", airdropOwner)
-    tokenAddress = await tokenAddr.getAddress();
-    beneficairy = await addr2.getAddress();
-    airdrop = await Airdrp.deploy(tokenAddress) 
-
-    airdropDeployed = await airdrop.deployed()  
+    [airdropOwner, addr1, addr2, addr3] = await ethers.getSigners()
+    
+    // Deploy the token contract 
+    const Token = await ethers.getContractFactory("Token")
+    const token = await Token.deploy()
+    
+    // Deploy the airdrop smart contract
+    const Airdrp = await ethers.getContractFactory("Airdrop")
+    airdrop = await Airdrp.deploy(token.address)
+    
+    await token.connect(airdropOwner).mint(airdrop.address,1000) 
  });
 
+    // Airdrop tokens to the list of addresses provided
     it("Airdrops tokens to a list of addresses", async () => {
-    await airdropDeployed.dropTokens( [addr1.address, addr2.address], [1, 1]);
+    await airdrop.connect(airdropOwner).dropTokens([addr1.address, addr2.address], [1, 1]);
       });
 
+    // Fail when withdraw function is not called by the owner
    it('should fail when not called by contract creator', async () => {
-        airdropDeployed = airdropDeployed.connect(airdropOwner)
-        await expect(airdropDeployed.withdrawTokens(addr2.address)).to.be.revertedWith("Not Authorized")
+
+        await expect(
+        airdrop.connect(addr2).withdrawTokens(addr1.address))
+        .to.be.revertedWith("Ownable: caller is not the owner")
       });
 
  });
