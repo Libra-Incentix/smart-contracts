@@ -15,4 +15,4 @@ File which contains the wallet private keys
 
 ##### Compile and test smart contact
  - ```yarn install```
- - Copiling and testing smart contract ```yarn test```
+ - Compiling and testing smart contract ```yarn test```
