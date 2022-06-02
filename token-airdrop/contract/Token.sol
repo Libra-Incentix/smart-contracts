@@ -9,6 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Token is ERC20, Ownable {
 	constructor()ERC20("Test Token","TTT"){}
 	function mint(address to, uint256 amount) public onlyOwner {
-			_mint(to,amount);
+	 _mint(to,amount);
 	}
 }
